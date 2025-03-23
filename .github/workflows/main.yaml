@@ -1,0 +1,45 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore Produtor/AtualizaContatos.Producer.API/AtualizaContatos.Producer.API.csproj
+
+      - name: Build the project
+        run: dotnet build Produtor/AtualizaContatos.Producer.API/AtualizaContatos.Producer.API.csproj --configuration Release --no-restore
+
+      - name: Publish the project
+        run: dotnet publish Produtor/AtualizaContatos.Producer.API/AtualizaContatos.Producer.API.csproj --configuration Release --no-build --output out
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKER_USERNAME }}/atualizacontatos:latest
