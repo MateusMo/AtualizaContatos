@@ -32,7 +32,7 @@ jobs:
 
       - name: Validate Docker Username
         run: |
-          if [[ -z "${{ secrets.DOCKER_USERNAME }}" ]]; then
+          if [[ -z "$DOCKER_USERNAME" ]]; then
             echo "DOCKER_USERNAME is not set. Please configure it in GitHub Secrets."
             exit 1
           fi
