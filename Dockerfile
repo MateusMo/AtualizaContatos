@@ -2,9 +2,8 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-# Copia os arquivos do projeto
-COPY AtualizaContatos.sln .
-COPY Produtor/ Produtor/
+# Copia todos os arquivos do projeto
+COPY . .
 
 # Restaura as dependências do projeto específico
 RUN dotnet restore "Produtor/Produtor.csproj"
