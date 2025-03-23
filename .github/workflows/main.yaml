@@ -19,13 +19,13 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore Produtor/AtualizaContatos.Producer.API/AtualizaContatos.Producer.API.csproj
+        run: dotnet restore Produtor/Produtor.csproj
 
       - name: Build the project
-        run: dotnet build Produtor/AtualizaContatos.Producer.API/AtualizaContatos.Producer.API.csproj --configuration Release --no-restore
+        run: dotnet build Produtor/Produtor.csproj --configuration Release --no-restore
 
       - name: Publish the project
-        run: dotnet publish Produtor/AtualizaContatos.Producer.API/AtualizaContatos.Producer.API.csproj --configuration Release --no-build --output out
+        run: dotnet publish Produtor/Produtor.csproj --configuration Release --no-build --output out
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v1
