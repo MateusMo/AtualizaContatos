@@ -10,13 +10,10 @@ builder.Services.AddControllers();
 // Configurar o MassTransit com RabbitMQ
 builder.Services.AddMassTransit(config =>
 {
+    var rabbitMqHost = builder.Configuration["RABBITMQ_HOST"];
     config.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host(builder.Configuration["RabbitMQ:HostName"], "/", h =>
-        {
-            h.Username(builder.Configuration["RabbitMQ:UserName"]);
-            h.Password(builder.Configuration["RabbitMQ:Password"]);
-        });
+        cfg.Host(rabbitMqHost);
     });
 });
 

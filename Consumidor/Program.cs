@@ -30,16 +30,13 @@ builder.Services.AddScoped<UpdateContactConsumer>();
 // Configurar o MassTransit com RabbitMQ
 builder.Services.AddMassTransit(config =>
 {
+    var rabbitMqHost = builder.Configuration["RABBITMQ_HOST"];
     // Adicionar o consumidor
     config.AddConsumer<UpdateContactConsumer>();
 
     config.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host(builder.Configuration["RabbitMQ:HostName"], "/", h =>
-        {
-            h.Username(builder.Configuration["RabbitMQ:UserName"]);
-            h.Password(builder.Configuration["RabbitMQ:Password"]);
-        });
+        cfg.Host(rabbitMqHost);
 
         // Configurar o endpoint para a fila "PutQueue"
         cfg.ReceiveEndpoint("PutQueue", e =>
