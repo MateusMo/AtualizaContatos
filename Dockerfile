@@ -3,7 +3,7 @@ FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
 # Copia todos os arquivos do projeto
-COPY AtualizaContatos.sln .
+COPY . .
 COPY Produtor/ Produtor/
 
 # Restaura as dependências
