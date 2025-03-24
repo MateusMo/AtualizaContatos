@@ -14,7 +14,3 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /app/publish/produtor ./produtor
 COPY --from=build /app/publish/consumidor ./consumidor
-
-# Permissão para evitar erro 145
-RUN chmod +x ./produtor/Produtor.dll && \
-    chmod +x ./consumidor/Consumidor.dll
