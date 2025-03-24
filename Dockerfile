@@ -2,13 +2,11 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copia o arquivo de solução e os diretórios dos projetos
-COPY AtualizaContatos.sln .
-COPY Produtor/ Produtor/
-COPY Consumidor/ Consumidor/
+# Copia tudo do contexto (assegure-se de ter um .dockerignore para filtrar arquivos desnecessários)
+COPY . .
 
-# Restaura as dependências de todos os projetos da solução
-RUN dotnet restore
+# Restaura as dependências utilizando o arquivo de solução
+RUN dotnet restore AtualizaContatos.sln
 
 # Publica os projetos desejados
 RUN dotnet publish Produtor/Produtor.csproj -c Release -o out/produtor
@@ -22,7 +20,7 @@ WORKDIR /app
 COPY --from=build /app/out/produtor ./produtor
 COPY --from=build /app/out/consumidor ./consumidor
 
-# Exemplo: expõe a porta do produtor (caso a aplicação utilize)
+# Exemplo: expõe a porta utilizada pelo produtor
 EXPOSE 8081
 
 # O ENTRYPOINT não é definido aqui, pois será sobrescrito no docker-compose
