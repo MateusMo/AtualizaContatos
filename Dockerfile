@@ -1,16 +1,28 @@
+# Etapa de build
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
-COPY . .
+WORKDIR /app
 
-# Restaura e publica separadamente
-RUN dotnet restore "Produtor/Produtor.csproj" && \
-    dotnet publish "Produtor/Produtor.csproj" -c Release -o /app/publish/produtor
+# Copia o arquivo de solução e os diretórios dos projetos
+COPY AtualizaContatos.sln .
+COPY Produtor/ Produtor/
+COPY Consumidor/ Consumidor/
 
-RUN dotnet restore "Consumidor/Consumidor.csproj" && \
-    dotnet publish "Consumidor/Consumidor.csproj" -c Release -o /app/publish/consumidor
+# Restaura as dependências de todos os projetos da solução
+RUN dotnet restore
 
-# Fase final
+# Publica os projetos desejados
+RUN dotnet publish Produtor/Produtor.csproj -c Release -o out/produtor
+RUN dotnet publish Consumidor/Consumidor.csproj -c Release -o out/consumidor
+
+# Etapa final
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
-COPY --from=build /app/publish/produtor ./produtor
-COPY --from=build /app/publish/consumidor ./consumidor
+
+# Copia os arquivos publicados para os diretórios finais
+COPY --from=build /app/out/produtor ./produtor
+COPY --from=build /app/out/consumidor ./consumidor
+
+# Exemplo: expõe a porta do produtor (caso a aplicação utilize)
+EXPOSE 8081
+
+# O ENTRYPOINT não é definido aqui, pois será sobrescrito no docker-compose
