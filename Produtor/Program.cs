@@ -1,29 +1,54 @@
+using Consumer;
+using ContactZone.Application.Repositories;
+using ContactZone.Application.Services;
+using ContactZone.Infrastructure.Data;
+using ContactZone.Infrastructure.Repositories;
 using MassTransit;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 
-// Configurar o MassTransit com RabbitMQ
+// Registrar o DbContext (se necessário para o Consumer)
+builder.Services.AddDbContext<AtualizaContatosDbContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("ContactZone"),
+        b => b.MigrationsAssembly("ContactZone.Infrastructure"))
+);
+
+// Registrar serviços e repositórios (ajuste conforme seus namespaces)
+builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+builder.Services.AddScoped<IContactRepository, ContactRepository>();
+builder.Services.AddScoped<IContactService, ContactService>();
+
+// Configurar o MassTransit com Consumer
 builder.Services.AddMassTransit(config =>
 {
     var rabbitMqHost = builder.Configuration["RABBITMQ_HOST"];
+
+    // Adicionar o Consumer
+    config.AddConsumer<UpdateContactConsumer>();
+
     config.UsingRabbitMq((context, cfg) =>
     {
         cfg.Host(rabbitMqHost);
+
+        // Configurar o endpoint para a fila "PutQueue"
+        cfg.ReceiveEndpoint("PutQueue", e =>
+        {
+            e.ConfigureConsumer<UpdateContactConsumer>(context);
+        });
     });
 });
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Add Swagger (opcional)
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -31,9 +56,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
