@@ -22,7 +22,14 @@ namespace Consumer
         {
             var contact = context.Message;
 
-            _contactService.Update(contact);
+            var contactModel = await _contactService.GetByIdAsync(contact.Id);
+            
+            contactModel.DDD = contact.DDD;
+            contactModel.Phone = contact.Phone;
+            contactModel.Email = contact.Email;
+            contactModel.Name = contact.Name;
+
+            _contactService.Update(contactModel);
 
             _logger.LogInformation("Contato atualizado: {ContactId}", contact.Id);
         }
