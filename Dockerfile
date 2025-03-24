@@ -1,20 +1,27 @@
-# Etapa de build
+# Use a imagem oficial do SDK do .NET para construir o projeto
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
-WORKDIR /src
+WORKDIR /app
 
-COPY . .
+# Copia todos os arquivos do projeto
+COPY AtualizaContatos.sln .
+COPY Produtor/ Produtor/
 
-# Restaura e publica separadamente com caminhos absolutos
-RUN dotnet restore "Produtor/Produtor.csproj" && \
-    dotnet publish "Produtor/Produtor.csproj" -c Release -o /app/publish/produtor
+# Restaura as dependências
+RUN dotnet restore
 
-RUN dotnet restore "Consumidor/Consumidor.csproj" && \
-    dotnet publish "Consumidor/Consumidor.csproj" -c Release -o /app/publish/consumidor
+# Publica o projeto
+WORKDIR /app/Produtor
+RUN dotnet publish -c Release -o out
 
-# Etapa final
+# Usa a imagem do runtime do .NET para rodar a aplicação
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 
-# Copia mantendo estrutura de diretórios
-COPY --from=build /app/publish/produtor ./produtor
-COPY --from=build /app/publish/consumidor ./consumidor
+# Copia os arquivos publicados
+COPY --from=build /app/Produtor/out . 
+
+# Expõe a porta 8080
+EXPOSE 8080
+
+# Define o ponto de entrada
+ENTRYPOINT ["dotnet", "Produtor.dll"]
