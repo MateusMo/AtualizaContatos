@@ -14,7 +14,7 @@ builder.Services.AddControllers();
 // Registrar o DbContext (se necessário para o Consumer)
 builder.Services.AddDbContext<AtualizaContatosDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("ContactZone"),
+        builder.Configuration.GetConnectionString("DefaultConnection"),
         b => b.MigrationsAssembly("ContactZone.Infrastructure"))
 );
 
